@@ -1,10 +1,5 @@
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      ghost
-      <br />
-      AI
-    </div>
-  );
-}
+import { EditorWorkspace } from "@/components/editor/editor-workspace";
 
+export default function Home() {
+  return <EditorWorkspace />;
+}
