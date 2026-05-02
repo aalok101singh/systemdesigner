@@ -35,7 +35,7 @@
       "expectations": [
         "Removes 'use client' directive from home page",
         "Removes useUser hook import and usage",
-        "Uses SignedIn/SignedOut components from @clerk/nextjs for conditional rendering",
+        "Uses SignedIn/SignedOut components or the Show component from `@clerk/nextjs` for conditional rendering",
         "Preserves the same visual output (welcome message when signed in, sign-in prompt when not)",
         "Page works as a server component"
       ]
@@ -60,7 +60,7 @@
       "scaffold": "nextjs-basic-auth",
       "expectations": [
         "Uses getToken with a template parameter (e.g. 'hasura') to get a custom JWT",
-        "Uses either auth() server-side or useAuth() client-side to access getToken",
+        "Uses auth() server-side to access getToken",
         "Passes the token as Authorization Bearer header to the external API call",
         "Handles the case where getToken returns null (user not authenticated)"
       ]
