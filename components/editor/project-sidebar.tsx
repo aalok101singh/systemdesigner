@@ -29,6 +29,7 @@ export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
           : "pointer-events-none -translate-x-[calc(100%+1rem)]"
       )}
       aria-hidden={!isOpen}
+      inert={!isOpen}
     >
       <div className="mb-4 flex h-8 items-center justify-between">
         <h2 className="text-sm font-medium text-copy-primary">Projects</h2>

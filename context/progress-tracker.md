@@ -1,0 +1,61 @@
+# Progress Tracker
+
+Update this file whenever the current phase, active feature, or implementation state changes.
+
+## Current Phase
+
+- Auth foundation complete
+
+## Current Goal
+
+- Ready for the next feature unit.
+
+## Completed
+
+- Implemented feature unit 01: design system and UI primitive setup.
+- Installed and configured shadcn/ui with Button, Card, Dialog, Input, Tabs, Textarea, and ScrollArea primitives.
+- Installed Lucide React and added `lib/utils.ts` with the reusable `cn()` helper.
+- Configured dark-only Ghost theme tokens in `app/globals.css`.
+- Implemented feature unit 02: editor chrome foundation.
+- Added the reusable editor navbar with left, center, and right sections plus sidebar state icons.
+- Added the floating project sidebar shell with tabs, empty states, close control, and a full-width New Project action.
+- Wired the editor workspace into the root page with local sidebar open/close state.
+- Confirmed the existing shadcn dialog primitives already provide title, description, and footer action slots; no dialog instances were added.
+- Implemented feature unit 03: Clerk authentication wiring.
+- Installed `@clerk/ui` and wrapped the root layout in `ClerkProvider` with Clerk's dark theme and app CSS variable overrides.
+- Added public sign-in and sign-up pages with a minimal two-panel desktop auth layout and form-only mobile presentation.
+- Added root `proxy.ts` route protection that leaves only the configured Clerk sign-in/sign-up paths public.
+- Updated `/` to redirect authenticated users to `/editor` and unauthenticated users to the sign-in route.
+- Moved the editor workspace to `/editor` and added Clerk's default `UserButton` to the editor navbar.
+- Suppressed root layout hydration warnings caused by browser extensions mutating `<html>` or `<body>` before React hydration.
+- Refined the auth screen visual direction with a stronger split layout, Ghost AI capability rows, and a tighter themed Clerk form surface inspired by the provided reference without copying it.
+- Fixed protected-route redirects so unauthenticated users stay on the local `/sign-in` and `/sign-up` routes instead of Clerk's hosted development domain.
+
+## In Progress
+
+- None.
+
+## Next Up
+
+- Select the next feature spec to implement.
+
+## Open Questions
+
+- None.
+
+## Architecture Decisions
+
+- shadcn/ui is configured through `components.json` with generated primitives under `components/ui/`.
+- Ghost theme tokens are mapped in `app/globals.css` and applied as the default dark-only theme.
+- Editor chrome state is isolated in a small client workspace while the route page remains a Server Component.
+- Clerk route paths are resolved through the standard `NEXT_PUBLIC_CLERK_SIGN_IN_URL` and `NEXT_PUBLIC_CLERK_SIGN_UP_URL` environment variables with local `/sign-in` and `/sign-up` fallbacks.
+- Next.js 16 route protection uses root-level `proxy.ts`; no `middleware.ts` is used.
+- Clerk proxy protection explicitly uses local unauthenticated redirects to keep auth navigation on the app domain.
+
+## Session Notes
+
+- Verified with lint, TypeScript, `cn()` merge behavior, and production build.
+- Feature unit 02 verified with `npm run lint` and `npm run build`.
+- Feature unit 03 verified with `npm run lint` and `npm run build`.
+- Root hydration warning mitigation verified with `npm run lint` and `npm run build`.
+- Local auth redirect verified by probing `/editor`; unauthenticated requests now return `307` with `Location: /sign-in`.
