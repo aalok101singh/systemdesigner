@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Auth foundation complete
+- Project dialogs and editor home complete
 
 ## Current Goal
 
@@ -30,6 +30,12 @@ Update this file whenever the current phase, active feature, or implementation s
 - Suppressed root layout hydration warnings caused by browser extensions mutating `<html>` or `<body>` before React hydration.
 - Refined the auth screen visual direction with a stronger split layout, Ghost AI capability rows, and a tighter themed Clerk form surface inspired by the provided reference without copying it.
 - Fixed protected-route redirects so unauthenticated users stay on the local `/sign-in` and `/sign-up` routes instead of Clerk's hosted development domain.
+- Implemented feature unit 04: project dialogs and editor home.
+- Added the centered `/editor` home prompt with a `New Project` action.
+- Added mock owned/shared project data, owner-only sidebar rename/delete actions, and mobile sidebar outside-click scrim behavior.
+- Added create, rename, and delete project dialogs backed by a dedicated client hook for dialog, form, loading, and mock project state.
+- Wired live slug preview for project creation and local mock create/rename/delete updates without API calls or persistence.
+- Fixed current editor home/dialog issues by starting `/editor` on the home canvas, adding an `Open Existing Project` sidebar action, and making dialog text contrast explicit with Ghost theme tokens.
 
 ## In Progress
 
@@ -59,3 +65,5 @@ Update this file whenever the current phase, active feature, or implementation s
 - Feature unit 03 verified with `npm run lint` and `npm run build`.
 - Root hydration warning mitigation verified with `npm run lint` and `npm run build`.
 - Local auth redirect verified by probing `/editor`; unauthenticated requests now return `307` with `Location: /sign-in`.
+- Feature unit 04 verified with `npm run lint` and `npm run build`.
+- Current editor home/dialog issue fixes verified with `npm run lint` and `npm run build`.

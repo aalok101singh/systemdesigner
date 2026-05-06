@@ -49,7 +49,11 @@ export async function deleteProject(projectId: string) {
   const canDelete = await has({ permission: 'org:project:delete' });
   if (!canDelete) throw new Error('Missing permission');
 
-  await db.projects.delete({ where: { id: projectId } });
+  const result = await db.projects.deleteMany({
+    where: { id: projectId, organizationId: orgId },
+  });
+  if (result.count === 0) throw new Error('Project not found');
+  }
 }
 ```
 
