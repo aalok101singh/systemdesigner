@@ -53,7 +53,6 @@ export async function deleteProject(projectId: string) {
     where: { id: projectId, organizationId: orgId },
   });
   if (result.count === 0) throw new Error('Project not found');
-  }
 }
 ```
 

@@ -36,6 +36,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Added create, rename, and delete project dialogs backed by a dedicated client hook for dialog, form, loading, and mock project state.
 - Wired live slug preview for project creation and local mock create/rename/delete updates without API calls or persistence.
 - Fixed current editor home/dialog issues by starting `/editor` on the home canvas, adding an `Open Existing Project` sidebar action, and making dialog text contrast explicit with Ghost theme tokens.
+- Resolved the current issue batch across Clerk skill evals/docs, helper script line endings, Next.js route-handler examples, shadcn dependency placement, and textarea/input primitive classes.
 
 ## In Progress
 
@@ -67,3 +68,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Local auth redirect verified by probing `/editor`; unauthenticated requests now return `307` with `Location: /sign-in`.
 - Feature unit 04 verified with `npm run lint` and `npm run build`.
 - Current editor home/dialog issue fixes verified with `npm run lint` and `npm run build`.
+- Current issue batch verified with `npm run lint`, `npm run build`, JSON parsing checks, eval schema checks, targeted reviewer-pattern scans, script LF checks, and `git diff --check` on the touched files.
