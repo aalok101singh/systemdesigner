@@ -11,9 +11,21 @@ const getDatabaseUrl = () => {
 
 const createPrismaClient = () => {
   const databaseUrl = getDatabaseUrl();
+
+  if (databaseUrl.startsWith("prisma+postgres://")) {
+    return new PrismaClient({
+      datasources: {
+        db: {
+          url: databaseUrl,
+        },
+      },
+    });
+  }
+
   const adapter = new PrismaPg({
     connectionString: databaseUrl,
   });
+
   return new PrismaClient({ adapter });
 };
 
