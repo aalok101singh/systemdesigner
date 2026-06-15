@@ -6,6 +6,7 @@ Server Actions are public endpoints. Always verify auth.
 
 ```typescript
 'use server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@clerk/nextjs/server';
 
 export async function createPost(formData: FormData) {
@@ -41,13 +42,17 @@ export async function createTeamProject(formData: FormData) {
 import { auth } from '@clerk/nextjs/server';
 
 export async function deleteProject(projectId: string) {
-  const { userId, has } = await auth();
-  if (!userId) throw new Error('Unauthorized');
+  const { userId, orgId, has } = await auth();
+  if (!userId || !orgId) throw new Error('Unauthorized');
+
 
   const canDelete = await has({ permission: 'org:project:delete' });
   if (!canDelete) throw new Error('Missing permission');
 
-  await db.projects.delete({ where: { id: projectId } });
+  const result = await db.projects.deleteMany({
+    where: { id: projectId, organizationId: orgId },
+  });
+  if (result.count === 0) throw new Error('Project not found');
 }
 ```
 
