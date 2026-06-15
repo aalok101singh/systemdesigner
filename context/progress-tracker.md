@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Prisma data layer setup complete
+- Prisma data layer setup mostly complete
 
 ## Current Goal
 
-- Ready for the next feature unit.
+- Finalize Prisma client DATABASE_URL branching for Accelerate support before moving to the next feature unit.
 
 ## Completed
 
@@ -39,9 +39,10 @@ Update this file whenever the current phase, active feature, or implementation s
 - Resolved the current issue batch across Clerk skill evals/docs, helper script line endings, Next.js route-handler examples, shadcn dependency placement, and textarea/input primitive classes.
 - Implemented feature unit 05: Prisma data layer.
 - Created Prisma schema with `Project` and `ProjectCollaborator` models with appropriate relations, enums, and indexes.
-- Created `lib/prisma.ts` as a cached singleton with support for direct PostgreSQL connection using the `@prisma/adapter-pg` driver adapter.
+- Created `lib/prisma.ts` as a cached singleton with support for direct PostgreSQL connection using the `@prisma/adapter-pg` driver adapter and `prisma+postgres://` Accelerate URL branching.
 - Ran migration to create database tables and generated Prisma client to `app/generated/prisma`.
 - Verified build passes with `npm run build`.
+- Fixed the project sidebar UI issue by correcting the invalid Tailwind positioning utility and restoring the My Projects / Shared tabs layout.
 
 ## In Progress
 
