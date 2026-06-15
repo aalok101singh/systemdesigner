@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Finalize Prisma client DATABASE_URL branching for Accelerate support before moving to the next feature unit.
+- Select the next feature spec to implement now that Prisma branching is finalized.
 
 ## Completed
 
@@ -43,6 +43,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Ran migration to create database tables and generated Prisma client to `app/generated/prisma`.
 - Verified build passes with `npm run build`.
 - Fixed the project sidebar UI issue by correcting the invalid Tailwind positioning utility and restoring the My Projects / Shared tabs layout.
+ - Fixed a TypeScript build error in `lib/prisma.ts` by casting runtime-only Prisma client options (`datasources` / `adapter`) to `any`, preserving runtime behavior for Accelerate and adapter usage.
 
 ## In Progress
 
@@ -76,3 +77,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Current editor home/dialog issue fixes verified with `npm run lint` and `npm run build`.
 - Current issue batch verified with `npm run lint`, `npm run build`, JSON parsing checks, eval schema checks, targeted reviewer-pattern scans, script LF checks, and `git diff --check` on the touched files.
 - Feature unit 05 migration ran successfully with `npx prisma migrate dev --name init`. Generated client verified with `npx prisma generate`. Build verified with `npm run build`.
+ - Resolved TypeScript errors introduced by runtime-only Prisma options and re-verified `npm run build` completed successfully after the fix.
