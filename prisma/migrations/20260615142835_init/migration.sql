@@ -8,7 +8,7 @@ CREATE TABLE "projects" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "status" "ProjectStatus" NOT NULL DEFAULT 'DRAFT',
-    "canvasJsonPath" TEXT,
+    "canvas_json_path" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
