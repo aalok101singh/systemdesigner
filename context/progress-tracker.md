@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Project dialogs and editor home complete
+- Prisma data layer setup complete
 
 ## Current Goal
 
@@ -37,6 +37,11 @@ Update this file whenever the current phase, active feature, or implementation s
 - Wired live slug preview for project creation and local mock create/rename/delete updates without API calls or persistence.
 - Fixed current editor home/dialog issues by starting `/editor` on the home canvas, adding an `Open Existing Project` sidebar action, and making dialog text contrast explicit with Ghost theme tokens.
 - Resolved the current issue batch across Clerk skill evals/docs, helper script line endings, Next.js route-handler examples, shadcn dependency placement, and textarea/input primitive classes.
+- Implemented feature unit 05: Prisma data layer.
+- Created Prisma schema with `Project` and `ProjectCollaborator` models with appropriate relations, enums, and indexes.
+- Created `lib/prisma.ts` as a cached singleton with support for direct PostgreSQL connection using the `@prisma/adapter-pg` driver adapter.
+- Ran migration to create database tables and generated Prisma client to `app/generated/prisma`.
+- Verified build passes with `npm run build`.
 
 ## In Progress
 
@@ -69,3 +74,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Feature unit 04 verified with `npm run lint` and `npm run build`.
 - Current editor home/dialog issue fixes verified with `npm run lint` and `npm run build`.
 - Current issue batch verified with `npm run lint`, `npm run build`, JSON parsing checks, eval schema checks, targeted reviewer-pattern scans, script LF checks, and `git diff --check` on the touched files.
+- Feature unit 05 migration ran successfully with `npx prisma migrate dev --name init`. Generated client verified with `npx prisma generate`. Build verified with `npm run build`.
