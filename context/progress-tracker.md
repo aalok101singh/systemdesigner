@@ -57,7 +57,8 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## In Progress
 
-- None.
+- Cleanup: removed accidental `deployement` branch and merged its commits into `development`.
+- Pull request: pushed `development` to origin; create PR from `development` -> `main` via GitHub UI or `gh` CLI.
 
 ## Next Up
 
