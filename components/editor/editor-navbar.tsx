@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean;
-  onToggleSidebar: () => void;
+  onToggleSidebar?: () => void;
 }
 
 export function EditorNavbar({
@@ -24,8 +24,8 @@ export function EditorNavbar({
           variant="ghost"
           size="icon"
           aria-label={isSidebarOpen ? "Close project sidebar" : "Open project sidebar"}
-          aria-pressed={isSidebarOpen}
-          onClick={onToggleSidebar}
+          aria-expanded={isSidebarOpen}
+          onClick={() => onToggleSidebar?.()}
         >
           <SidebarIcon className="h-5 w-5" />
         </Button>
