@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Prisma data layer setup mostly complete
+- Editor home and project persistence complete; addressing PostgreSQL SSL mode compatibility warning and final server/client integration fixes.
 
 ## Current Goal
 
-- Select the next feature spec to implement now that Prisma branching is finalized.
+- Resolve the pg-connection-string SSL mode warning and prepare for future libpq semantics alignment.
 
 ## Completed
 
@@ -42,8 +42,18 @@ Update this file whenever the current phase, active feature, or implementation s
 - Created `lib/prisma.ts` as a cached singleton with support for direct PostgreSQL connection using the `@prisma/adapter-pg` driver adapter and `prisma+postgres://` Accelerate URL branching.
 - Ran migration to create database tables and generated Prisma client to `app/generated/prisma`.
 - Verified build passes with `npm run build`.
-- Fixed the project sidebar UI issue by correcting the invalid Tailwind positioning utility and restoring the My Projects / Shared tabs layout.
- - Fixed a TypeScript build error in `lib/prisma.ts` by casting runtime-only Prisma client options (`datasources` / `adapter`) to `any`, preserving runtime behavior for Accelerate and adapter usage.
+- Fixed the project sidebar UI issue by correcting the invalid Tailwind positioning utility and restoring the My Projects / Shared tabs layout.- Rebuilt the editor chrome per `context/feature-specs/02-editor.md`, ensuring the floating project sidebar now slides in from the left and sits directly below the top navbar without pushing page content.- Connected `/editor` home and dialogs to real project persistence with new API routes and server-side project fetching.
+- Added `app/api/projects` and `app/api/projects/[projectId]` routes for authenticated list/create/rename/delete operations.
+- Added `hooks/use-project-actions.ts` for dialog state, form handling, and workspace navigation.
+- Added `app/editor/[projectId]/page.tsx` for persisted workspace navigation.
+- Verified the final production build passes after wiring the new backend and UI updates.
+- Fixed server-side event handler prop serialization by moving `EditorNavbar` state into a client shell used by `app/editor/[projectId]/page.tsx`.
+- Fixed PostgreSQL SSL mode warning by updating DATABASE_URL to use explicit `sslmode=verify-full` instead of `sslmode=require`.
+- This ensures compatibility with future versions (pg-connection-string v3.0.0 and pg v9.0.0) while maintaining current security guarantees.
+ - Fixed sidebar empty-state styling to match the design reference (remove inset rounded card when no projects).
+ - Added guards in project utilities to avoid calling `prisma.findUnique` with an undefined `id`, preventing runtime `PrismaClientValidationError` when routes receive missing params.
+ - Fixed server `params` handling on `app/editor/[projectId]/page.tsx` by awaiting `params` before using `projectId`, resolving Next.js runtime Promise access error.
+ - Removed inner rounded panel in `TabsContent` so the sidebar empty state matches the reference layout more closely.
 
 ## In Progress
 
@@ -78,3 +88,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Current issue batch verified with `npm run lint`, `npm run build`, JSON parsing checks, eval schema checks, targeted reviewer-pattern scans, script LF checks, and `git diff --check` on the touched files.
 - Feature unit 05 migration ran successfully with `npx prisma migrate dev --name init`. Generated client verified with `npx prisma generate`. Build verified with `npm run build`.
  - Resolved TypeScript errors introduced by runtime-only Prisma options and re-verified `npm run build` completed successfully after the fix.
+- SSL mode warning fix: Updated DATABASE_URL connection string from `sslmode=require` to `sslmode=verify-full` to eliminate pg-connection-string deprecation warnings and maintain forward compatibility.
+- Fixed the project delete regression by handling `204 No Content` responses in `hooks/use-project-actions.ts`.
+- Refined the project sidebar tab UI so `My Projects` and `Shared` controls fit inside the panel, reduced button size, improved active state clarity, centered the project list frame, and added top padding for a cleaner UX.
+- Added extra sidebar top padding so the Projects panel sits comfortably below the editor navbar without appearing cramped.
+- Resolved the event handler prop serialization error in `app/editor/[projectId]/page.tsx` by moving `EditorNavbar` client sidebar state into `components/editor/project-page-shell.tsx`; verified with `npm run build`.

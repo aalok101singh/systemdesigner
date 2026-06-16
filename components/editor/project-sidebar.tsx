@@ -15,11 +15,12 @@ interface ProjectSidebarProps {
   onCreateProject: () => void;
   onRenameProject: (project: MockProject) => void;
   onDeleteProject: (project: MockProject) => void;
+  onOpenProject: (project: MockProject) => void;
 }
 
 function EmptyProjectState({ label }: { label: string }) {
   return (
-    <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-surface-border-subtle bg-subtle/45 px-4 text-center text-sm text-copy-muted">
+    <div className="flex min-h-[12rem] w-full items-center justify-center px-4 text-center text-sm text-copy-muted">
       {label}
     </div>
   );
@@ -30,11 +31,13 @@ function ProjectList({
   emptyLabel,
   onRenameProject,
   onDeleteProject,
+  onOpenProject,
 }: {
   projects: MockProject[];
   emptyLabel: string;
   onRenameProject: (project: MockProject) => void;
   onDeleteProject: (project: MockProject) => void;
+  onOpenProject: (project: MockProject) => void;
 }) {
   if (projects.length === 0) {
     return <EmptyProjectState label={emptyLabel} />;
@@ -50,9 +53,17 @@ function ProjectList({
             key={project.id}
             className="flex items-center gap-2 rounded-2xl border border-surface-border bg-subtle/45 p-2"
           >
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               className="min-w-0 flex-1 rounded-xl px-2 py-1.5 text-left outline-none transition-colors hover:bg-accent-dim focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => onOpenProject(project)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onOpenProject(project);
+                }
+              }}
             >
               <span className="block truncate text-sm font-medium text-copy-primary">
                 {project.name}
@@ -63,7 +74,7 @@ function ProjectList({
               <span className="mt-1 block truncate text-xs text-copy-faint">
                 {project.updatedAtLabel}
               </span>
-            </button>
+            </div>
 
             {canManage && (
               <div className="flex shrink-0 items-center gap-1">
@@ -103,6 +114,7 @@ export function ProjectSidebar({
   onCreateProject,
   onRenameProject,
   onDeleteProject,
+  onOpenProject,
 }: ProjectSidebarProps) {
   return (
     <>
@@ -117,15 +129,14 @@ export function ProjectSidebar({
 
       <aside
         className={cn(
-          "fixed bottom-4 left-4 top-[4.5rem] z-40 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-sidebar-border bg-sidebar px-4 py-4 shadow-2xl backdrop-blur transition-transform duration-200 ease-out",
+          "fixed left-4 top-16 bottom-4 z-40 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.75rem] border border-sidebar-border bg-sidebar shadow-2xl transition-transform duration-200 ease-out",
           isOpen
             ? "translate-x-0"
             : "pointer-events-none -translate-x-[calc(100%+1rem)]"
         )}
         aria-hidden={!isOpen}
-        inert={!isOpen}
       >
-        <div className="mb-4 flex h-8 items-center justify-between">
+        <div className="flex items-center justify-between px-4 py-4">
           <h2 className="text-sm font-medium text-copy-primary">Projects</h2>
           <Button
             type="button"
@@ -138,48 +149,61 @@ export function ProjectSidebar({
           </Button>
         </div>
 
-        <Tabs defaultValue="my-projects" className="min-h-0 flex-1">
-          <TabsList className="flex w-full items-center gap-1 rounded-lg bg-subtle p-[3px]">
-            <TabsTrigger className="h-11" value="my-projects">
-              My Projects
-            </TabsTrigger>
-            <TabsTrigger className="h-11" value="shared">
-              Shared
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent
-            value="my-projects"
-            className="mt-4 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1"
-          >
-            <ProjectList
-              projects={ownedProjects}
-              emptyLabel="No projects yet."
-              onRenameProject={onRenameProject}
-              onDeleteProject={onDeleteProject}
-            />
-          </TabsContent>
-          <TabsContent
-            value="shared"
-            className="mt-4 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1"
-          >
-            <ProjectList
-              projects={sharedProjects}
-              emptyLabel="No shared projects yet."
-              onRenameProject={onRenameProject}
-              onDeleteProject={onDeleteProject}
-            />
-          </TabsContent>
+        <Tabs defaultValue="my-projects" className="mx-auto flex w-full max-w-[22rem] flex-1 flex-col items-center overflow-hidden px-4 pb-4 pt-4">
+          <div className="rounded-3xl border border-surface-border bg-surface p-3 mx-auto w-full max-w-[20rem]">
+            <TabsList className="mx-auto grid w-full grid-cols-2 gap-2 rounded-2xl bg-subtle p-1">
+              <TabsTrigger className="h-10 rounded-full border border-surface-border bg-transparent px-4 text-sm font-medium text-copy-muted transition-colors data-[state=active]:bg-surface data-[state=active]:text-copy-primary data-[state=active]:shadow-sm" value="my-projects">
+                My Projects
+              </TabsTrigger>
+              <TabsTrigger className="h-10 rounded-full border border-surface-border bg-transparent px-4 text-sm font-medium text-copy-muted transition-colors data-[state=active]:bg-surface data-[state=active]:text-copy-primary data-[state=active]:shadow-sm" value="shared">
+                Shared
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <div className="mt-4 flex min-h-0 flex-1 overflow-hidden rounded-3xl border border-surface-border bg-subtle">
+            <div className="flex-1 overflow-y-auto p-4 flex justify-center">
+              <div className="w-full max-w-[18rem]">
+                <TabsContent
+                  value="my-projects"
+                  className="h-full"
+                >
+                  <ProjectList
+                    projects={ownedProjects}
+                    emptyLabel="No projects yet."
+                    onRenameProject={onRenameProject}
+                    onDeleteProject={onDeleteProject}
+                    onOpenProject={onOpenProject}
+                  />
+                </TabsContent>
+                <TabsContent
+                  value="shared"
+                  className="h-full"
+                >
+                  <ProjectList
+                    projects={sharedProjects}
+                    emptyLabel="No shared projects yet."
+                    onRenameProject={onRenameProject}
+                    onDeleteProject={onDeleteProject}
+                    onOpenProject={onOpenProject}
+                  />
+                </TabsContent>
+              </div>
+            </div>
+          </div>
         </Tabs>
 
-        <Button
-          type="button"
-          className="mt-4 w-full"
-          size="lg"
-          onClick={onCreateProject}
-        >
-          <Plus className="h-4 w-4" />
-          New Project
-        </Button>
+        <div className="px-4 pb-4 pt-3">
+          <Button
+            type="button"
+            className="w-full"
+            size="lg"
+            onClick={onCreateProject}
+          >
+            <Plus className="h-4 w-4" />
+            New Project
+          </Button>
+        </div>
       </aside>
     </>
   );

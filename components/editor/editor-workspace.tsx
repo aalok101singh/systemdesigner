@@ -7,11 +7,16 @@ import { Button } from "@/components/ui/button";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
-import { useProjectDialogs } from "@/components/editor/use-project-dialogs";
+import { useProjectActions, type ProjectItem } from "@/hooks/use-project-actions";
 
-export function EditorWorkspace() {
+interface EditorWorkspaceProps {
+  ownedProjects: ProjectItem[];
+  sharedProjects: ProjectItem[];
+}
+
+export function EditorWorkspace({ ownedProjects, sharedProjects }: EditorWorkspaceProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const projectDialogs = useProjectDialogs();
+  const projectActions = useProjectActions({ ownedProjects, sharedProjects });
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-base text-copy-primary">
@@ -22,11 +27,12 @@ export function EditorWorkspace() {
       <ProjectSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        ownedProjects={projectDialogs.ownedProjects}
-        sharedProjects={projectDialogs.sharedProjects}
-        onCreateProject={projectDialogs.openCreateDialog}
-        onRenameProject={projectDialogs.openRenameDialog}
-        onDeleteProject={projectDialogs.openDeleteDialog}
+        ownedProjects={projectActions.ownedProjects}
+        sharedProjects={projectActions.sharedProjects}
+        onCreateProject={projectActions.openCreateDialog}
+        onRenameProject={projectActions.openRenameDialog}
+        onDeleteProject={projectActions.openDeleteDialog}
+        onOpenProject={projectActions.openProject}
       />
       <main
         className="relative grid min-h-0 flex-1 place-items-center bg-base px-6"
@@ -43,7 +49,7 @@ export function EditorWorkspace() {
             <Button
               type="button"
               size="lg"
-              onClick={projectDialogs.openCreateDialog}
+              onClick={projectActions.openCreateDialog}
             >
               <Plus className="h-4 w-4" />
               New Project
@@ -60,7 +66,7 @@ export function EditorWorkspace() {
           </div>
         </div>
       </main>
-      <ProjectDialogs controller={projectDialogs} />
+      <ProjectDialogs controller={projectActions} />
     </div>
   );
 }
