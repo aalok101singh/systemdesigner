@@ -53,7 +53,7 @@ export function ProjectDialogs({ controller }: ProjectDialogsProps) {
               Create Project
             </DialogTitle>
             <DialogDescription className="text-copy-secondary">
-              Name a new architecture workspace. Persistence will be connected in a later feature unit.
+              Name a new architecture workspace. The project is persisted to the database.
             </DialogDescription>
           </DialogHeader>
 

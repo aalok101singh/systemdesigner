@@ -13,20 +13,26 @@ const createPrismaClient = () => {
   const databaseUrl = getDatabaseUrl();
 
   if (databaseUrl.startsWith("prisma+postgres://")) {
+    // Prisma client types don't expose the runtime-only `datasources` option
+    // in the generated `PrismaClientOptions` type. Cast to `any` to allow
+    // providing the runtime override for the datasource URL used by
+    // `prisma+postgres://` (Accelerate) without changing generated types.
     return new PrismaClient({
       datasources: {
         db: {
           url: databaseUrl,
         },
       },
-    });
+    } as any);
   }
 
   const adapter = new PrismaPg({
     connectionString: databaseUrl,
   });
 
-  return new PrismaClient({ adapter });
+  // The `adapter` option is also a runtime extension not reflected in the
+  // generated types; cast to `any` to pass it through.
+  return new PrismaClient({ adapter } as any);
 };
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
