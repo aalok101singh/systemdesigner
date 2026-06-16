@@ -55,6 +55,8 @@ Update this file whenever the current phase, active feature, or implementation s
  - Fixed server `params` handling on `app/editor/[projectId]/page.tsx` by awaiting `params` before using `projectId`, resolving Next.js runtime Promise access error.
  - Removed inner rounded panel in `TabsContent` so the sidebar empty state matches the reference layout more closely.
 
+- Fixed reported issues: added explicit authenticated-user vs provided `userId` verification in `lib/projects.ts` to avoid `currentUser()` mismatches, and imported `useEffect` in `hooks/use-project-actions.ts` to resolve the hook error.
+
 ## In Progress
 
 - Cleanup: removed accidental `deployement` branch and merged its commits into `development`.
@@ -96,3 +98,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Added user-facing error handling for project create/rename/delete actions in `hooks/use-project-actions.ts`.
 - Added explicit project authorization checks in `lib/projects.ts` and consistent sign-in redirect handling in `app/editor/[projectId]/page.tsx`.
 - Resolved the event handler prop serialization error in `app/editor/[projectId]/page.tsx` by moving `EditorNavbar` client sidebar state into `components/editor/project-page-shell.tsx`; verified with `npm run build`.
+ - Patched code-level issues from `context/current-issues.md` (authorization guard and `useEffect` import); verified edits compile locally.

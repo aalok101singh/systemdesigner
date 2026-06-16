@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 export type ProjectOwnership = "owner" | "collaborator";
@@ -66,6 +66,10 @@ export function useProjectActions({
     ...ownedProjects,
     ...sharedProjects,
   ]);
+
+  useEffect(() => {
+      setProjects([...ownedProjects, ...sharedProjects]);
+  }, [ownedProjects, sharedProjects]);
   const [dialog, setDialog] = useState<ProjectDialog>(null);
   const [projectName, setProjectName] = useState("");
   const [isLoading, setIsLoading] = useState(false);

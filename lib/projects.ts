@@ -69,6 +69,13 @@ export async function getProjectsForUser(userId: string): Promise<{
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
 
+  // Ensure the authenticated user matches the provided userId to avoid
+  // accidental authorization / identity mismatches when both ID and
+  // email are used for project lookup.
+  if (user && user.id !== userId) {
+    throw new ForbiddenError("Authenticated user does not match requested userId");
+  }
+
   const projects = await prisma.project.findMany({
     where: {
       OR: [
@@ -98,6 +105,11 @@ export async function getProjectById(projectId?: string, userId?: string) {
 
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+
+  // Guard against a different authenticated user than the one supplied.
+  if (user && user.id !== userId) {
+    throw new ForbiddenError("Authenticated user does not match requested userId");
+  }
 
   const project = await prisma.project.findFirst({
     where: {

@@ -31,11 +31,11 @@ export function ProjectPageShell({ projectName }: ProjectPageShellProps) {
             This workspace is backed by your project record. The editor canvas will come in the next feature unit.
           </p>
           <div className="mt-6 flex justify-center">
-            <Link href="/editor">
-              <Button type="button" variant="outline" size="lg">
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/editor">
                 Back to editor home
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </main>

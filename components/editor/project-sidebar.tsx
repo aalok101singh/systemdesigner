@@ -135,6 +135,7 @@ export function ProjectSidebar({
             : "pointer-events-none -translate-x-[calc(100%+1rem)]"
         )}
         aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
       >
         <div className="flex items-center justify-between px-4 py-4">
           <h2 className="text-sm font-medium text-copy-primary">Projects</h2>

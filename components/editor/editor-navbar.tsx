@@ -24,7 +24,7 @@ export function EditorNavbar({
           variant="ghost"
           size="icon"
           aria-label={isSidebarOpen ? "Close project sidebar" : "Open project sidebar"}
-          aria-pressed={isSidebarOpen}
+          aria-expanded={isSidebarOpen}
           onClick={() => onToggleSidebar?.()}
         >
           <SidebarIcon className="h-5 w-5" />
