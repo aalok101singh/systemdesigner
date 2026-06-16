@@ -125,6 +125,9 @@ export function useProjectActions({
       setDialog(null);
       setProjectName("");
       router.push(`/editor/${project.id}`);
+    } catch (error) {
+      console.error("Failed to create project:", error);
+      window.alert("Failed to create project. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -158,6 +161,9 @@ export function useProjectActions({
       );
       setDialog(null);
       setProjectName("");
+    } catch (error) {
+      console.error("Failed to rename project:", error);
+      window.alert("Failed to rename project. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -184,6 +190,9 @@ export function useProjectActions({
       }
 
       setDialog(null);
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        window.alert("Failed to delete project. Please try again.");
     } finally {
       setIsLoading(false);
     }

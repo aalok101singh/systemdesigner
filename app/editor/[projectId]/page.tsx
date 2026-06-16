@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import { notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
+import { SIGN_IN_URL } from "@/lib/auth-routes";
 import { getProjectById } from "@/lib/projects";
 import { ProjectPageShell } from "@/components/editor/project-page-shell";
 
@@ -8,11 +9,11 @@ export default async function ProjectPage({ params }: Readonly<{ params: Promise
   const { userId } = await auth();
 
   if (!userId) {
-    return notFound();
+    redirect(SIGN_IN_URL);
   }
 
   const resolvedParams = await params;
-  const project = await getProjectById(resolvedParams.projectId);
+  const project = await getProjectById(resolvedParams.projectId, userId);
 
   if (!project) {
     return notFound();

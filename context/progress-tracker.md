@@ -92,4 +92,6 @@ Update this file whenever the current phase, active feature, or implementation s
 - Fixed the project delete regression by handling `204 No Content` responses in `hooks/use-project-actions.ts`.
 - Refined the project sidebar tab UI so `My Projects` and `Shared` controls fit inside the panel, reduced button size, improved active state clarity, centered the project list frame, and added top padding for a cleaner UX.
 - Added extra sidebar top padding so the Projects panel sits comfortably below the editor navbar without appearing cramped.
+- Added user-facing error handling for project create/rename/delete actions in `hooks/use-project-actions.ts`.
+- Added explicit project authorization checks in `lib/projects.ts` and consistent sign-in redirect handling in `app/editor/[projectId]/page.tsx`.
 - Resolved the event handler prop serialization error in `app/editor/[projectId]/page.tsx` by moving `EditorNavbar` client sidebar state into `components/editor/project-page-shell.tsx`; verified with `npm run build`.

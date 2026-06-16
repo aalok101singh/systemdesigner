@@ -2,6 +2,13 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { prisma } from "@/lib/prisma";
 
+export class ForbiddenError extends Error {
+  constructor(message = "Forbidden") {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
+
 export type ProjectOwnership = "owner" | "collaborator";
 
 export interface ProjectPayload {
@@ -84,13 +91,27 @@ export async function getProjectsForUser(userId: string): Promise<{
   };
 }
 
-export async function getProjectById(projectId?: string) {
-  if (!projectId) {
+export async function getProjectById(projectId?: string, userId?: string) {
+  if (!projectId || !userId) {
     return null;
   }
 
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
+  const user = await currentUser();
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      OR: [
+        { ownerId: userId },
+        ...(userEmail
+          ? [{ collaborators: { some: { email: userEmail } } }]
+          : []),
+      ],
+    },
+    include: {
+      collaborators: true,
+    },
   });
 
   if (!project) {
@@ -133,7 +154,7 @@ export async function renameProjectForUser(
   }
 
   if (existingProject.ownerId !== ownerId) {
-    throw new Error("forbidden");
+    throw new ForbiddenError();
   }
 
   const updatedProject = await prisma.project.update({

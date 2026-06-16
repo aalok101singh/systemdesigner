@@ -4,18 +4,18 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { MockProject } from "@/components/editor/use-project-dialogs";
+import type { ProjectItem } from "@/hooks/use-project-actions";
 import { cn } from "@/lib/utils";
 
 interface ProjectSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  ownedProjects: MockProject[];
-  sharedProjects: MockProject[];
+  ownedProjects: ProjectItem[];
+  sharedProjects: ProjectItem[];
   onCreateProject: () => void;
-  onRenameProject: (project: MockProject) => void;
-  onDeleteProject: (project: MockProject) => void;
-  onOpenProject: (project: MockProject) => void;
+  onRenameProject: (project: ProjectItem) => void;
+  onDeleteProject: (project: ProjectItem) => void;
+  onOpenProject: (project: ProjectItem) => void;
 }
 
 function EmptyProjectState({ label }: { label: string }) {
@@ -33,11 +33,11 @@ function ProjectList({
   onDeleteProject,
   onOpenProject,
 }: {
-  projects: MockProject[];
+  projects: ProjectItem[];
   emptyLabel: string;
-  onRenameProject: (project: MockProject) => void;
-  onDeleteProject: (project: MockProject) => void;
-  onOpenProject: (project: MockProject) => void;
+  onRenameProject: (project: ProjectItem) => void;
+  onDeleteProject: (project: ProjectItem) => void;
+  onOpenProject: (project: ProjectItem) => void;
 }) {
   if (projects.length === 0) {
     return <EmptyProjectState label={emptyLabel} />;

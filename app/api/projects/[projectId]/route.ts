@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  ForbiddenError,
   getCurrentUserId,
   renameProjectForUser,
   deleteProjectForUser,
@@ -34,7 +35,12 @@ export async function PATCH(
 
     return NextResponse.json(updatedProject);
   } catch (error) {
-    return new NextResponse("Forbidden", { status: 403 });
+    if (error instanceof ForbiddenError) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    console.error("Failed to rename project:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
