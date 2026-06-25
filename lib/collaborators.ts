@@ -4,6 +4,7 @@ import { ForbiddenError } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 import type { ClerkIdentity } from "@/lib/project-access";
 import { getAccessibleProject } from "@/lib/project-access";
+import { Prisma } from "@/app/generated/prisma/client";
 
 export interface CollaboratorProfile {
   id: string;
@@ -148,17 +149,28 @@ export async function inviteProjectCollaborator(
     return "duplicate";
   }
 
-  const collaborator = await prisma.projectCollaborator.create({
-    data: {
-      projectId,
-      email,
-    },
-    select: {
-      id: true,
-      email: true,
-      createdAt: true,
-    },
-  });
+  let collaborator;
+  try {
+    collaborator = await prisma.projectCollaborator.create({
+      data: {
+        projectId,
+        email,
+      },
+      select: {
+        id: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return "duplicate";
+    }
+    throw error;
+  }
 
   const [enrichedCollaborator] = await enrichCollaborators([collaborator]);
   return enrichedCollaborator;

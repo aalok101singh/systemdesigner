@@ -26,7 +26,7 @@ export async function DELETE(
     );
 
     if (!removed) {
-      return new NextResponse("Forbidden or not found", { status: 403 });
+      return new NextResponse("Not found", { status: 404 });
     }
 
     return new NextResponse(null, { status: 204 });
