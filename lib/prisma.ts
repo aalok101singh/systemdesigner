@@ -1,51 +1,183 @@
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool, type PoolConfig } from "pg";
 
-const getDatabaseUrl = () => {
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+  pgPool: Pool | undefined;
+};
+
+function getDatabaseUrl() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error("DATABASE_URL is not set");
   }
   return url;
-};
+}
 
-const createPrismaClient = () => {
+function isConnectionClosedError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const prismaError = error as {
+    code?: string;
+    message?: string;
+    meta?: { driverAdapterError?: { name?: string } };
+  };
+
+  return (
+    prismaError.code === "P1017" ||
+    prismaError.meta?.driverAdapterError?.name === "ConnectionClosed" ||
+    prismaError.message?.includes("Server has closed the connection") === true
+  );
+}
+
+function getPoolConfig(connectionString: string): PoolConfig {
+  return {
+    connectionString,
+    max: 10,
+    idleTimeoutMillis: 20_000,
+    connectionTimeoutMillis: 10_000,
+    keepAlive: true,
+  };
+}
+
+function createPgPool(connectionString: string) {
+  const pool = new Pool(getPoolConfig(connectionString));
+
+  pool.on("error", (error) => {
+    console.error("[prisma] PostgreSQL pool error:", error.message);
+  });
+
+  return pool;
+}
+
+async function resetDatabaseClient() {
+  if (globalForPrisma.pgPool) {
+    await globalForPrisma.pgPool.end().catch(() => undefined);
+    globalForPrisma.pgPool = undefined;
+  }
+
+  if (globalForPrisma.prisma) {
+    await globalForPrisma.prisma.$disconnect().catch(() => undefined);
+    globalForPrisma.prisma = undefined;
+  }
+}
+
+let reconnectPromise: Promise<PrismaClient> | null = null;
+
+async function refreshPrismaClient(): Promise<PrismaClient> {
+  if (!reconnectPromise) {
+    reconnectPromise = (async () => {
+      await resetDatabaseClient();
+      return initializePrismaClient();
+    })().finally(() => {
+      reconnectPromise = null;
+    });
+  }
+
+  return reconnectPromise;
+}
+
+function getOrCreatePool(connectionString: string) {
+  if (!globalForPrisma.pgPool) {
+    globalForPrisma.pgPool = createPgPool(connectionString);
+  }
+
+  return globalForPrisma.pgPool;
+}
+
+function createAccelerateClient(databaseUrl: string) {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: databaseUrl,
+      },
+    },
+  } as any);
+}
+
+function createDriverAdapterClient(databaseUrl: string) {
+  const pool = getOrCreatePool(databaseUrl);
+  const adapter = new PrismaPg(pool, {
+    onPoolError: (error) => {
+      console.error("[prisma] Adapter pool error:", error.message);
+    },
+  });
+
+  return new PrismaClient({ adapter } as any);
+}
+
+function createBasePrismaClient() {
   const databaseUrl = getDatabaseUrl();
 
   if (databaseUrl.startsWith("prisma+postgres://")) {
-    // Prisma client types don't expose the runtime-only `datasources` option
-    // in the generated `PrismaClientOptions` type. Cast to `any` to allow
-    // providing the runtime override for the datasource URL used by
-    // `prisma+postgres://` (Accelerate) without changing generated types.
-    return new PrismaClient({
-      datasources: {
-        db: {
-          url: databaseUrl,
-        },
-      },
-    } as any);
+    return createAccelerateClient(databaseUrl);
   }
 
-  const adapter = new PrismaPg({
-    connectionString: databaseUrl,
+  return createDriverAdapterClient(databaseUrl);
+}
+
+function rerunOperation(
+  client: PrismaClient,
+  model: string | undefined,
+  operation: string,
+  args: unknown
+) {
+  if (!model) {
+    return (client as any)[operation](args);
+  }
+
+  const modelKey = model.charAt(0).toLowerCase() + model.slice(1);
+  return (client as any)[modelKey][operation](args);
+}
+
+const RETRYABLE_READ_OPERATIONS = new Set([
+  "findUnique",
+  "findUniqueOrThrow",
+  "findFirst",
+  "findFirstOrThrow",
+  "findMany",
+  "count",
+  "aggregate",
+  "groupBy",
+]);
+
+
+
+function createPrismaClientWithRetry(): PrismaClient {
+  const baseClient = createBasePrismaClient();
+
+  const extendedClient = baseClient.$extends({
+    query: {
+      $allOperations({ model, operation, args, query }) {
+        return query(args).catch(async (error: unknown) => {
+          if (!isConnectionClosedError(error)) {
+            throw error;
+          }
+
+          if (!RETRYABLE_READ_OPERATIONS.has(operation)) {
+            throw error;
+          }
+
+          const freshClient = await refreshPrismaClient();
+          return rerunOperation(freshClient, model, operation, args);
+        });
+      },
+    },
   });
 
-  // The `adapter` option is also a runtime extension not reflected in the
-  // generated types; cast to `any` to pass it through.
-  return new PrismaClient({ adapter } as any);
-};
+  return extendedClient as PrismaClient;
+}
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+function initializePrismaClient(): PrismaClient {
+  const client = createPrismaClientWithRetry();
+  globalForPrisma.prisma = client;
+  return client;
+}
 
-export const prisma =
-  globalForPrisma.prisma ||
-  (() => {
-    const client = createPrismaClient();
-    if (process.env.NODE_ENV !== "production") {
-      globalForPrisma.prisma = client;
-    }
-    return client;
-  })();
+export const prisma = globalForPrisma.prisma ?? initializePrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

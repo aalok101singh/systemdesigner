@@ -12,6 +12,7 @@ interface ProjectSidebarProps {
   onClose: () => void;
   ownedProjects: ProjectItem[];
   sharedProjects: ProjectItem[];
+  activeRoomId?: string;
   onCreateProject: () => void;
   onRenameProject: (project: ProjectItem) => void;
   onDeleteProject: (project: ProjectItem) => void;
@@ -29,12 +30,14 @@ function EmptyProjectState({ label }: { label: string }) {
 function ProjectList({
   projects,
   emptyLabel,
+  activeRoomId,
   onRenameProject,
   onDeleteProject,
   onOpenProject,
 }: {
   projects: ProjectItem[];
   emptyLabel: string;
+  activeRoomId?: string;
   onRenameProject: (project: ProjectItem) => void;
   onDeleteProject: (project: ProjectItem) => void;
   onOpenProject: (project: ProjectItem) => void;
@@ -47,15 +50,22 @@ function ProjectList({
     <div className="grid gap-2">
       {projects.map((project) => {
         const canManage = project.ownership === "owner";
+        const isActive = project.id === activeRoomId;
 
         return (
           <div
             key={project.id}
-            className="flex items-center gap-2 rounded-2xl border border-surface-border bg-subtle/45 p-2"
+            className={cn(
+              "flex items-center gap-2 rounded-2xl border p-2 transition-colors",
+              isActive
+                ? "border-brand/40 bg-accent-dim"
+                : "border-surface-border bg-subtle/45"
+            )}
           >
             <div
               role="button"
               tabIndex={0}
+              aria-current={isActive ? "page" : undefined}
               className="min-w-0 flex-1 rounded-xl px-2 py-1.5 text-left outline-none transition-colors hover:bg-accent-dim focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => onOpenProject(project)}
               onKeyDown={(event) => {
@@ -111,6 +121,7 @@ export function ProjectSidebar({
   onClose,
   ownedProjects,
   sharedProjects,
+  activeRoomId,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
@@ -172,6 +183,7 @@ export function ProjectSidebar({
                   <ProjectList
                     projects={ownedProjects}
                     emptyLabel="No projects yet."
+                    activeRoomId={activeRoomId}
                     onRenameProject={onRenameProject}
                     onDeleteProject={onDeleteProject}
                     onOpenProject={onOpenProject}
@@ -184,6 +196,7 @@ export function ProjectSidebar({
                   <ProjectList
                     projects={sharedProjects}
                     emptyLabel="No shared projects yet."
+                    activeRoomId={activeRoomId}
                     onRenameProject={onRenameProject}
                     onDeleteProject={onDeleteProject}
                     onOpenProject={onOpenProject}

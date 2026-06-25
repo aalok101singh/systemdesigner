@@ -1,20 +1,33 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  Share2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean;
   onToggleSidebar?: () => void;
+  projectName?: string;
+  isAiSidebarOpen?: boolean;
+  onToggleAiSidebar?: () => void;
 }
 
 export function EditorNavbar({
   isSidebarOpen,
   onToggleSidebar,
+  projectName,
+  isAiSidebarOpen = false,
+  onToggleAiSidebar,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
+  const AiSidebarIcon = isAiSidebarOpen ? PanelRightClose : PanelRightOpen;
 
   return (
     <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-surface-border bg-surface px-4">
@@ -23,7 +36,9 @@ export function EditorNavbar({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label={isSidebarOpen ? "Close project sidebar" : "Open project sidebar"}
+          aria-label={
+            isSidebarOpen ? "Close project sidebar" : "Open project sidebar"
+          }
           aria-expanded={isSidebarOpen}
           onClick={() => onToggleSidebar?.()}
         >
@@ -31,9 +46,40 @@ export function EditorNavbar({
         </Button>
       </div>
 
-      <div className="min-w-0" aria-hidden="true" />
+      <div className="min-w-0 px-4 text-center">
+        {projectName ? (
+          <p className="truncate text-sm font-medium text-copy-primary">
+            {projectName}
+          </p>
+        ) : null}
+      </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-1">
+        {onToggleAiSidebar ? (
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-label="Share project"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={
+                isAiSidebarOpen ? "Close AI sidebar" : "Open AI sidebar"
+              }
+              aria-expanded={isAiSidebarOpen}
+              onClick={() => onToggleAiSidebar()}
+            >
+              <AiSidebarIcon className="h-5 w-5" />
+            </Button>
+          </>
+        ) : null}
         <UserButton />
       </div>
     </header>

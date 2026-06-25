@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Editor home and project persistence complete; addressing PostgreSQL SSL mode compatibility warning and final server/client integration fixes.
+- Editor workspace shell complete; Prisma connection stability fix applied for dev runtime.
 
 ## Current Goal
 
-- Resolve the pg-connection-string SSL mode warning and prepare for future libpq semantics alignment.
+- Select the next feature spec to implement (canvas, Liveblocks, or AI chat).
 
 ## Completed
 
@@ -56,15 +56,25 @@ Update this file whenever the current phase, active feature, or implementation s
  - Removed inner rounded panel in `TabsContent` so the sidebar empty state matches the reference layout more closely.
 
 - Fixed reported issues: added explicit authenticated-user vs provided `userId` verification in `lib/projects.ts` to avoid `currentUser()` mismatches, and imported `useEffect` in `hooks/use-project-actions.ts` to resolve the hook error.
+- Implemented feature unit 08: editor workspace shell.
+- Added `lib/project-access.ts` with Clerk identity helpers and owner/collaborator project access checks.
+- Added `components/editor/access-denied.tsx` for missing or unauthorized projects with a link back to `/editor`.
+- Replaced `app/editor/[projectId]/page.tsx` with server-side `app/editor/[roomId]/page.tsx` using access helpers, sign-in redirect, and `AccessDenied` instead of `notFound()`.
+- Added `components/editor/workspace-shell.tsx` with full-viewport layout: project navbar, floating project sidebar, canvas placeholder, and AI sidebar placeholder.
+- Extended `EditorNavbar` with project name, share button, and AI sidebar toggle for workspace routes.
+- Extended `ProjectSidebar` with `activeRoomId` highlighting for the current room.
+- Removed the interim `project-page-shell.tsx` in favor of the new workspace shell.
+- Verified feature unit 08 with `npm run build`.
+- Fixed Prisma P1017 `ConnectionClosed` runtime error on `/editor` by hardening `lib/prisma.ts` with an explicit shared `pg.Pool`, connection lifecycle settings, and automatic client reset/retry on stale connections.
+- Cleared `context/current-issues.md` issue-1 after verifying `/editor` loads successfully in dev.
 
 ## In Progress
 
-- Cleanup: removed accidental `deployement` branch and merged its commits into `development`.
-- Pull request: pushed `development` to origin; create PR from `development` -> `main` via GitHub UI or `gh` CLI.
+- None.
 
 ## Next Up
 
-- Select the next feature spec to implement.
+- Canvas integration, Liveblocks room wiring, or AI chat sidebar — per upcoming feature specs.
 
 ## Open Questions
 
@@ -78,6 +88,9 @@ Update this file whenever the current phase, active feature, or implementation s
 - Clerk route paths are resolved through the standard `NEXT_PUBLIC_CLERK_SIGN_IN_URL` and `NEXT_PUBLIC_CLERK_SIGN_UP_URL` environment variables with local `/sign-in` and `/sign-up` fallbacks.
 - Next.js 16 route protection uses root-level `proxy.ts`; no `middleware.ts` is used.
 - Clerk proxy protection explicitly uses local unauthenticated redirects to keep auth navigation on the app domain.
+- Project ID and Liveblocks room ID stay aligned; workspace routes use `/editor/[roomId]` with access enforced in `lib/project-access.ts`.
+- Workspace routes render `AccessDenied` for missing or unauthorized projects instead of a generic 404.
+- Direct PostgreSQL access uses a shared `pg.Pool` behind `@prisma/adapter-pg`, with dev-time retry on closed connections (P1017).
 
 ## Session Notes
 
@@ -99,3 +112,5 @@ Update this file whenever the current phase, active feature, or implementation s
 - Added explicit project authorization checks in `lib/projects.ts` and consistent sign-in redirect handling in `app/editor/[projectId]/page.tsx`.
 - Resolved the event handler prop serialization error in `app/editor/[projectId]/page.tsx` by moving `EditorNavbar` client sidebar state into `components/editor/project-page-shell.tsx`; verified with `npm run build`.
  - Patched code-level issues from `context/current-issues.md` (authorization guard and `useEffect` import); verified edits compile locally.
+- Feature unit 08 verified with `npm run build`; `/editor/[roomId]` route compiles and access-denied flow is wired.
+- Prisma P1017 fix verified with `npm run build` and dev requests to `/editor` returning `200`.
