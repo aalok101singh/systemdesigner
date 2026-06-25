@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Share dialog complete; editor workspace shell ready for canvas/Liveblocks integration.
+- Shape panel and basic canvas node rendering complete; ready for shape-specific visuals, canvas controls, or AI sidebar.
 
 ## Current Goal
 
-- Select the next feature spec to implement (canvas, Liveblocks, or AI chat).
+- Select the next feature spec to implement (shape-specific node visuals, canvas controls, or AI chat sidebar).
 
 ## Completed
 
@@ -66,6 +66,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Removed the interim `project-page-shell.tsx` in favor of the new workspace shell.
 - Verified feature unit 08 with `npm run build`.
 - Fixed Prisma P1017 `ConnectionClosed` runtime error on `/editor` by hardening `lib/prisma.ts` with an explicit shared `pg.Pool`, connection lifecycle settings, and automatic client reset/retry on stale connections.
+- Fixed Prisma Postgres connection timeouts on `/editor` by routing `db.prisma.io` / `pooled.db.prisma.io` URLs through `@prisma/adapter-ppg` (HTTP/WebSocket serverless driver) when outbound PostgreSQL TCP (port 5432) is unreachable; local/other Postgres URLs still use `@prisma/adapter-pg`.
+- Pointed `prisma.config.ts` at `DIRECT_URL` (falling back to `DATABASE_URL`) for CLI migrations per Prisma Postgres connection guidance.
 - Cleared `context/current-issues.md` issue-1 after verifying `/editor` loads successfully in dev.
 - Implemented feature unit 09: share dialog.
 - Added `lib/collaborators.ts` with list/invite/remove helpers and Clerk Backend API profile enrichment by email.
@@ -78,6 +80,32 @@ Update this file whenever the current phase, active feature, or implementation s
   - Added outside-click dismiss for the project sidebar (all breakpoints) and AI sidebar via transparent backdrop layers below the navbar.
   - Replaced the AI sidebar navbar toggle icon with a Sparkles button styled with AI accent tokens; kept the project sidebar on PanelLeftOpen/Close.
 - Cleared `context/current-issues.md` after verifying `npm run build`.
+- Implemented feature unit 10: Liveblocks setup.
+- Configured `liveblocks.config.ts` with Presence (`cursor`, `isThinking`) and UserMeta (`name`, `avatar`, `cursorColor`).
+- Added cached Liveblocks node client in `lib/liveblocks.ts` and deterministic cursor color helper in `lib/cursor-color.ts`.
+- Added `POST /api/liveblocks-auth` with Clerk auth, project access checks via `lib/project-access.ts`, room get-or-create, and session tokens carrying user metadata.
+- Installed `@liveblocks/node` to match existing Liveblocks client packages.
+- Verified feature unit 10 with `npm run build`.
+- Implemented feature unit 11: base canvas.
+- Added `types/canvas.ts` with `NODE_COLORS`, `NODE_SHAPES`, `CanvasNodeData`, and custom `canvasNode` / `canvasEdge` types.
+- Added `components/editor/canvas-editor.tsx` with `LiveblocksProvider`, `RoomProvider`, initial presence, `ClientSideSuspense`, and connection error fallback.
+- Added `components/editor/canvas-flow.tsx` wiring `useLiveblocksFlow` (suspense, empty initial state) to React Flow with loose connections, `fitView`, `MiniMap`, and dot background.
+- Updated `liveblocks.config.ts` Storage with typed `flow` root for React Flow sync.
+- Replaced workspace canvas placeholder in `components/editor/workspace-shell.tsx` with the Liveblocks-backed editor.
+- Verified feature unit 11 with `npm run build`.
+- Implemented feature unit 12: shape panel.
+- Added `SHAPE_DEFAULT_SIZES`, `SHAPE_DRAG_MIME_TYPE`, and `ShapeDragPayload` to `types/canvas.ts`.
+- Added `lib/canvas-nodes.ts` with node ID generation and drag payload helpers.
+- Added `components/editor/shape-panel.tsx` with a bottom-center pill toolbar and draggable shape icon buttons.
+- Added `components/editor/canvas-node.tsx` with a basic bordered-rectangle renderer for the `canvasNode` type.
+- Updated `components/editor/canvas-flow.tsx` with `ReactFlowProvider`, drag-over/drop handling, Liveblocks node creation, and custom node types.
+- Verified feature unit 12 with `npm run build`.
+- Fixed workspace sidebar interaction from `context/current-issues.md`:
+  - Project workspace panels now stay open until their navbar toggle or close button is used; outside-click dismiss is disabled on `/editor/[roomId]`.
+  - Removed workspace canvas and AI sidebar backdrops that blocked canvas interaction and shape drag-and-drop while panels were open.
+  - Added a close button to the AI sidebar header in the project workspace.
+  - Kept editor home (`/editor`) outside-click sidebar dismiss unchanged via `ProjectSidebar` default behavior.
+- Verified workspace sidebar fix with `npm run build`.
 
 ## In Progress
 
@@ -85,7 +113,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Canvas integration, Liveblocks room wiring, or AI chat sidebar — per upcoming feature specs.
+- Shape-specific node visuals, canvas controls, or AI chat sidebar — per upcoming feature specs.
 
 ## Open Questions
 
@@ -102,8 +130,14 @@ Update this file whenever the current phase, active feature, or implementation s
 - Project ID and Liveblocks room ID stay aligned; workspace routes use `/editor/[roomId]` with access enforced in `lib/project-access.ts`.
 - Workspace routes render `AccessDenied` for missing or unauthorized projects instead of a generic 404.
 - Direct PostgreSQL access uses a shared `pg.Pool` behind `@prisma/adapter-pg`, with dev-time retry on closed connections (P1017).
+- Prisma Postgres hosted URLs (`db.prisma.io`, `pooled.db.prisma.io`) use `@prisma/adapter-ppg` at runtime so queries work over HTTPS/WebSockets when TCP port 5432 is blocked; Prisma CLI migrations still prefer `DIRECT_URL` when set.
 - Collaborators are stored by email in `ProjectCollaborator`; Clerk Backend API enriches list responses with display name and avatar when a user exists.
 - Share invite/remove mutations require project ownership; collaborator list and copy link are available to all project members.
+- Liveblocks rooms use the project ID as the room ID; private rooms are created on first auth via `getOrCreateRoom`, and access tokens are issued only after project membership is verified.
+- Cursor colors are deterministically derived from Clerk user IDs via a fixed palette in `lib/cursor-color.ts`.
+- Canvas state syncs through Liveblocks Storage under the `flow` key via `@liveblocks/react-flow`; the workspace renders a client `CanvasEditor` inside the server-fetched `/editor/[roomId]` route.
+- Canvas nodes are created via drag-and-drop from the bottom shape panel; default sizes and drag payloads live in `types/canvas.ts`, with ID generation in `lib/canvas-nodes.ts`.
+- Floating sidebars on editor home dismiss on outside click; on loaded project workspaces they stay open until the navbar toggle or panel close button is used, so the canvas remains interactive underneath.
 
 ## Session Notes
 
@@ -129,3 +163,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Prisma P1017 fix verified with `npm run build` and dev requests to `/editor` returning `200`.
 - Feature unit 09 verified with `npm run build`; share dialog routes compile and workspace Share action is wired.
 - Current issue batch verified with `npm run build`; sidebar tab panels stay equal width, outside-click closes floating panels, AI toggle uses Sparkles icon.
+- Feature unit 10 verified with `npm run build`; `/api/liveblocks-auth` compiles and lazy Liveblocks client init avoids build-time secret requirement.
+- Feature unit 11 verified with `npm run build`; workspace canvas loads via Liveblocks-backed React Flow with typed storage and suspense boundaries.
+- Feature unit 12 verified with `npm run build`; shape panel drag-and-drop creates Liveblocks-synced `canvasNode` nodes with default sizes and colors.
+- Workspace sidebar interaction fix verified with `npm run build`; canvas and shape panel remain usable while project/AI panels are open.
+- Prisma Postgres timeout fix verified with `npm run build` and a live `prisma.project.count()` query via the serverless adapter.
