@@ -65,6 +65,21 @@ async function resetDatabaseClient() {
   }
 }
 
+let reconnectPromise: Promise<PrismaClient> | null = null;
+
+async function refreshPrismaClient(): Promise<PrismaClient> {
+  if (!reconnectPromise) {
+    reconnectPromise = (async () => {
+      await resetDatabaseClient();
+      return initializePrismaClient();
+    })().finally(() => {
+      reconnectPromise = null;
+    });
+  }
+
+  return reconnectPromise;
+}
+
 function getOrCreatePool(connectionString: string) {
   if (!globalForPrisma.pgPool) {
     globalForPrisma.pgPool = createPgPool(connectionString);
@@ -118,6 +133,19 @@ function rerunOperation(
   return (client as any)[modelKey][operation](args);
 }
 
+const RETRYABLE_READ_OPERATIONS = new Set([
+  "findUnique",
+  "findUniqueOrThrow",
+  "findFirst",
+  "findFirstOrThrow",
+  "findMany",
+  "count",
+  "aggregate",
+  "groupBy",
+]);
+
+
+
 function createPrismaClientWithRetry(): PrismaClient {
   const baseClient = createBasePrismaClient();
 
@@ -129,15 +157,18 @@ function createPrismaClientWithRetry(): PrismaClient {
             throw error;
           }
 
-          await resetDatabaseClient();
-          const freshClient = initializePrismaClient();
+          if (!RETRYABLE_READ_OPERATIONS.has(operation)) {
+            throw error;
+          }
+
+          const freshClient = await refreshPrismaClient();
           return rerunOperation(freshClient, model, operation, args);
         });
       },
     },
   });
 
-  return extendedClient as unknown as PrismaClient;
+  return extendedClient as PrismaClient;
 }
 
 function initializePrismaClient(): PrismaClient {
