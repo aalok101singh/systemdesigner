@@ -6,12 +6,15 @@ import { Sparkles } from "lucide-react";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
+import { ShareDialog } from "@/components/editor/share-dialog";
 import { useProjectActions, type ProjectItem } from "@/hooks/use-project-actions";
+import { useShareDialog } from "@/hooks/use-share-dialog";
 import { cn } from "@/lib/utils";
 
 interface WorkspaceShellProps {
   roomId: string;
   projectName: string;
+  isOwner: boolean;
   ownedProjects: ProjectItem[];
   sharedProjects: ProjectItem[];
 }
@@ -19,12 +22,14 @@ interface WorkspaceShellProps {
 export function WorkspaceShell({
   roomId,
   projectName,
+  isOwner,
   ownedProjects,
   sharedProjects,
 }: WorkspaceShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const projectActions = useProjectActions({ ownedProjects, sharedProjects });
+  const shareDialog = useShareDialog(roomId);
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-base text-copy-primary">
@@ -34,6 +39,7 @@ export function WorkspaceShell({
         projectName={projectName}
         isAiSidebarOpen={isAiSidebarOpen}
         onToggleAiSidebar={() => setIsAiSidebarOpen((isOpen) => !isOpen)}
+        onShareClick={shareDialog.openDialog}
       />
 
       <ProjectSidebar
@@ -52,6 +58,14 @@ export function WorkspaceShell({
         <main
           className="relative flex min-h-0 flex-1 items-center justify-center bg-base px-6"
           aria-label="Canvas workspace"
+          onClick={() => {
+            if (isSidebarOpen) {
+              setIsSidebarOpen(false);
+            }
+            if (isAiSidebarOpen) {
+              setIsAiSidebarOpen(false);
+            }
+          }}
         >
           <div className="max-w-lg text-center">
             <p className="text-sm uppercase tracking-[0.2em] text-copy-muted">
@@ -67,6 +81,15 @@ export function WorkspaceShell({
           </div>
         </main>
 
+        {isAiSidebarOpen ? (
+          <button
+            type="button"
+            className="fixed inset-x-0 top-14 bottom-0 z-30 bg-transparent"
+            aria-label="Close AI sidebar"
+            onClick={() => setIsAiSidebarOpen(false)}
+          />
+        ) : null}
+
         <aside
           className={cn(
             "fixed right-4 top-16 bottom-4 z-40 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.75rem] border border-sidebar-border bg-sidebar shadow-2xl transition-transform duration-200 ease-out",
@@ -76,6 +99,7 @@ export function WorkspaceShell({
           )}
           aria-hidden={!isAiSidebarOpen}
           inert={!isAiSidebarOpen ? true : undefined}
+          onClick={(event) => event.stopPropagation()}
         >
           <div className="flex items-center gap-2 border-b border-surface-border px-4 py-4">
             <Sparkles className="h-4 w-4 text-accent-ai-text" aria-hidden="true" />
@@ -90,6 +114,12 @@ export function WorkspaceShell({
       </div>
 
       <ProjectDialogs controller={projectActions} />
+      <ShareDialog
+        controller={shareDialog}
+        isOwner={isOwner}
+        projectId={roomId}
+        projectName={projectName}
+      />
     </div>
   );
 }

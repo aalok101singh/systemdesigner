@@ -4,9 +4,8 @@ import { UserButton } from "@clerk/nextjs";
 import {
   PanelLeftClose,
   PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
   Share2,
+  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ interface EditorNavbarProps {
   projectName?: string;
   isAiSidebarOpen?: boolean;
   onToggleAiSidebar?: () => void;
+  onShareClick?: () => void;
 }
 
 export function EditorNavbar({
@@ -25,9 +25,9 @@ export function EditorNavbar({
   projectName,
   isAiSidebarOpen = false,
   onToggleAiSidebar,
+  onShareClick,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
-  const AiSidebarIcon = isAiSidebarOpen ? PanelRightClose : PanelRightOpen;
 
   return (
     <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-surface-border bg-surface px-4">
@@ -62,6 +62,7 @@ export function EditorNavbar({
               variant="ghost"
               size="sm"
               aria-label="Share project"
+              onClick={() => onShareClick?.()}
             >
               <Share2 className="h-4 w-4" />
               Share
@@ -70,13 +71,14 @@ export function EditorNavbar({
               type="button"
               variant="ghost"
               size="icon"
+              className="text-accent-ai-text hover:bg-accent-ai/10 hover:text-accent-ai-text"
               aria-label={
                 isAiSidebarOpen ? "Close AI sidebar" : "Open AI sidebar"
               }
               aria-expanded={isAiSidebarOpen}
               onClick={() => onToggleAiSidebar()}
             >
-              <AiSidebarIcon className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </Button>
           </>
         ) : null}

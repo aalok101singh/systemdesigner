@@ -37,6 +37,11 @@ export function EditorWorkspace({ ownedProjects, sharedProjects }: EditorWorkspa
       <main
         className="relative grid min-h-0 flex-1 place-items-center bg-base px-6"
         aria-label="Editor home"
+        onClick={() => {
+          if (isSidebarOpen) {
+            setIsSidebarOpen(false);
+          }
+        }}
       >
         <div className="max-w-xl text-center">
           <h1 className="text-2xl font-semibold text-copy-primary sm:text-3xl">

@@ -33,6 +33,7 @@ export default async function EditorRoomPage({
     <WorkspaceShell
       roomId={roomId}
       projectName={project.name}
+      isOwner={project.ownerId === identity.userId}
       ownedProjects={ownedProjects}
       sharedProjects={sharedProjects}
     />
