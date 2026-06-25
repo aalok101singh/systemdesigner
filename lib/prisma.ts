@@ -16,10 +16,10 @@ function getDatabaseUrl() {
   return url;
 }
 
-function isPrismaPostgresUrl(databaseUrl: string) {
+function isPrismaPostgresServerlessUrl(databaseUrl: string) {
   try {
     const hostname = new URL(databaseUrl).hostname;
-    return hostname === "db.prisma.io" || hostname === "pooled.db.prisma.io";
+    return hostname === "db.prisma.io";
   } catch {
     return false;
   }
@@ -147,7 +147,7 @@ function createBasePrismaClient() {
     return createAccelerateClient(databaseUrl);
   }
 
-  if (isPrismaPostgresUrl(databaseUrl)) {
+  if (isPrismaPostgresServerlessUrl(databaseUrl)) {
     return createServerlessClient(databaseUrl);
   }
 
@@ -182,7 +182,7 @@ const RETRYABLE_READ_OPERATIONS = new Set([
 function createPrismaClientWithRetry(): PrismaClient {
   const baseClient = createBasePrismaClient();
   const databaseUrl = getDatabaseUrl();
-  const usesServerlessDriver = isPrismaPostgresUrl(databaseUrl);
+  const usesServerlessDriver = isPrismaPostgresServerlessUrl(databaseUrl);
 
   if (usesServerlessDriver || databaseUrl.startsWith("prisma+postgres://")) {
     return baseClient;

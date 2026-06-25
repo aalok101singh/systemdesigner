@@ -6,11 +6,10 @@ import {
   type ShapeDragPayload,
 } from "@/types/canvas";
 
-let canvasNodeIdCounter = 0;
+
 
 export function createCanvasNodeId(shape: NodeShape): string {
-  canvasNodeIdCounter += 1;
-  return `${shape}-${Date.now()}-${canvasNodeIdCounter}`;
+  return `${shape}-${crypto.randomUUID()}`;
 }
 
 export function createShapeDragPayload(shape: NodeShape): ShapeDragPayload {
