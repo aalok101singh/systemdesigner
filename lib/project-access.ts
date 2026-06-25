@@ -15,7 +15,7 @@ export async function getCurrentClerkIdentity(): Promise<ClerkIdentity | null> {
   }
 
   const user = await currentUser();
-  const primaryEmail = user?.emailAddresses?.[0]?.emailAddress ?? null;
+  const primaryEmail = user?.primaryEmailAddress?.emailAddress ?? null;
 
   return { userId, primaryEmail };
 }

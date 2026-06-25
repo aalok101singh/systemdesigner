@@ -21,7 +21,7 @@ interface ProjectSidebarProps {
 
 function EmptyProjectState({ label }: { label: string }) {
   return (
-    <div className="flex min-h-[12rem] w-full items-center justify-center px-4 text-center text-sm text-copy-muted">
+    <div className="flex h-full min-h-[14rem] w-full items-center justify-center px-4 text-center text-sm text-copy-muted">
       {label}
     </div>
   );
@@ -47,7 +47,7 @@ function ProjectList({
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="grid w-full gap-2">
       {projects.map((project) => {
         const canManage = project.ownership === "owner";
         const isActive = project.id === activeRoomId;
@@ -132,7 +132,7 @@ export function ProjectSidebar({
       {isOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-base/70 backdrop-blur-sm md:hidden"
+          className="fixed inset-x-0 top-14 bottom-0 z-30 bg-transparent"
           aria-label="Close project sidebar"
           onClick={onClose}
         />
@@ -147,6 +147,7 @@ export function ProjectSidebar({
         )}
         aria-hidden={!isOpen}
         inert={!isOpen ? true : undefined}
+        onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-4">
           <h2 className="text-sm font-medium text-copy-primary">Projects</h2>
@@ -161,9 +162,12 @@ export function ProjectSidebar({
           </Button>
         </div>
 
-        <Tabs defaultValue="my-projects" className="mx-auto flex w-full max-w-[22rem] flex-1 flex-col items-center overflow-hidden px-4 pb-4 pt-4">
-          <div className="rounded-3xl border border-surface-border bg-surface p-3 mx-auto w-full max-w-[20rem]">
-            <TabsList className="mx-auto grid w-full grid-cols-2 gap-2 rounded-2xl bg-subtle p-1">
+        <Tabs
+          defaultValue="my-projects"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4 pt-4"
+        >
+          <div className="w-full shrink-0 rounded-3xl border border-surface-border bg-surface p-3">
+            <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl bg-subtle p-1">
               <TabsTrigger className="h-10 rounded-full border border-surface-border bg-transparent px-4 text-sm font-medium text-copy-muted transition-colors data-[state=active]:bg-surface data-[state=active]:text-copy-primary data-[state=active]:shadow-sm" value="my-projects">
                 My Projects
               </TabsTrigger>
@@ -173,37 +177,27 @@ export function ProjectSidebar({
             </TabsList>
           </div>
 
-          <div className="mt-4 flex min-h-0 flex-1 overflow-hidden rounded-3xl border border-surface-border bg-subtle">
-            <div className="flex-1 overflow-y-auto p-4 flex justify-center">
-              <div className="w-full max-w-[18rem]">
-                <TabsContent
-                  value="my-projects"
-                  className="h-full"
-                >
-                  <ProjectList
-                    projects={ownedProjects}
-                    emptyLabel="No projects yet."
-                    activeRoomId={activeRoomId}
-                    onRenameProject={onRenameProject}
-                    onDeleteProject={onDeleteProject}
-                    onOpenProject={onOpenProject}
-                  />
-                </TabsContent>
-                <TabsContent
-                  value="shared"
-                  className="h-full"
-                >
-                  <ProjectList
-                    projects={sharedProjects}
-                    emptyLabel="No shared projects yet."
-                    activeRoomId={activeRoomId}
-                    onRenameProject={onRenameProject}
-                    onDeleteProject={onDeleteProject}
-                    onOpenProject={onOpenProject}
-                  />
-                </TabsContent>
-              </div>
-            </div>
+          <div className="mt-4 flex min-h-0 flex-1 w-full flex-col overflow-hidden rounded-3xl border border-surface-border bg-subtle">
+            <TabsContent value="my-projects" className="m-0 h-full w-full overflow-y-auto p-4">
+              <ProjectList
+                projects={ownedProjects}
+                emptyLabel="No projects yet."
+                activeRoomId={activeRoomId}
+                onRenameProject={onRenameProject}
+                onDeleteProject={onDeleteProject}
+                onOpenProject={onOpenProject}
+              />
+            </TabsContent>
+            <TabsContent value="shared" className="m-0 h-full w-full overflow-y-auto p-4">
+              <ProjectList
+                projects={sharedProjects}
+                emptyLabel="No shared projects yet."
+                activeRoomId={activeRoomId}
+                onRenameProject={onRenameProject}
+                onDeleteProject={onDeleteProject}
+                onOpenProject={onOpenProject}
+              />
+            </TabsContent>
           </div>
         </Tabs>
 

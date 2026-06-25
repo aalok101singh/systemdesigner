@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Editor workspace shell complete; Prisma connection stability fix applied for dev runtime.
+- Share dialog complete; editor workspace shell ready for canvas/Liveblocks integration.
 
 ## Current Goal
 
@@ -67,6 +67,17 @@ Update this file whenever the current phase, active feature, or implementation s
 - Verified feature unit 08 with `npm run build`.
 - Fixed Prisma P1017 `ConnectionClosed` runtime error on `/editor` by hardening `lib/prisma.ts` with an explicit shared `pg.Pool`, connection lifecycle settings, and automatic client reset/retry on stale connections.
 - Cleared `context/current-issues.md` issue-1 after verifying `/editor` loads successfully in dev.
+- Implemented feature unit 09: share dialog.
+- Added `lib/collaborators.ts` with list/invite/remove helpers and Clerk Backend API profile enrichment by email.
+- Added `GET/POST /api/projects/[projectId]/collaborators` and `DELETE /api/projects/[projectId]/collaborators/[collaboratorId]` with owner-only invite/remove enforcement.
+- Added `hooks/use-share-dialog.ts` and `components/editor/share-dialog.tsx` for invite, collaborator list, remove, and copy-link feedback.
+- Wired the workspace Share navbar button to open the dialog; owners get full controls, collaborators get read-only list and copy link.
+- Verified feature unit 09 with `npm run build`.
+- Fixed current issue batch from `context/current-issues.md`:
+  - Normalized project sidebar tab panel widths so My Projects and Shared use the same full-width static container and no longer shrink on empty state.
+  - Added outside-click dismiss for the project sidebar (all breakpoints) and AI sidebar via transparent backdrop layers below the navbar.
+  - Replaced the AI sidebar navbar toggle icon with a Sparkles button styled with AI accent tokens; kept the project sidebar on PanelLeftOpen/Close.
+- Cleared `context/current-issues.md` after verifying `npm run build`.
 
 ## In Progress
 
@@ -91,6 +102,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Project ID and Liveblocks room ID stay aligned; workspace routes use `/editor/[roomId]` with access enforced in `lib/project-access.ts`.
 - Workspace routes render `AccessDenied` for missing or unauthorized projects instead of a generic 404.
 - Direct PostgreSQL access uses a shared `pg.Pool` behind `@prisma/adapter-pg`, with dev-time retry on closed connections (P1017).
+- Collaborators are stored by email in `ProjectCollaborator`; Clerk Backend API enriches list responses with display name and avatar when a user exists.
+- Share invite/remove mutations require project ownership; collaborator list and copy link are available to all project members.
 
 ## Session Notes
 
@@ -114,3 +127,5 @@ Update this file whenever the current phase, active feature, or implementation s
  - Patched code-level issues from `context/current-issues.md` (authorization guard and `useEffect` import); verified edits compile locally.
 - Feature unit 08 verified with `npm run build`; `/editor/[roomId]` route compiles and access-denied flow is wired.
 - Prisma P1017 fix verified with `npm run build` and dev requests to `/editor` returning `200`.
+- Feature unit 09 verified with `npm run build`; share dialog routes compile and workspace Share action is wired.
+- Current issue batch verified with `npm run build`; sidebar tab panels stay equal width, outside-click closes floating panels, AI toggle uses Sparkles icon.
