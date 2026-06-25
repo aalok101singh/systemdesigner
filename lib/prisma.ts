@@ -1,3 +1,4 @@
+import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool, type PoolConfig } from "pg";
@@ -15,7 +16,16 @@ function getDatabaseUrl() {
   return url;
 }
 
-function isConnectionClosedError(error: unknown) {
+function isPrismaPostgresUrl(databaseUrl: string) {
+  try {
+    const hostname = new URL(databaseUrl).hostname;
+    return hostname === "db.prisma.io" || hostname === "pooled.db.prisma.io";
+  } catch {
+    return false;
+  }
+}
+
+function isRetryableConnectionError(error: unknown) {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -23,13 +33,26 @@ function isConnectionClosedError(error: unknown) {
   const prismaError = error as {
     code?: string;
     message?: string;
-    meta?: { driverAdapterError?: { name?: string } };
+    meta?: { driverAdapterError?: { name?: string; cause?: { message?: string } } };
+    cause?: { message?: string };
   };
+
+  const messages = [
+    prismaError.message,
+    prismaError.cause?.message,
+    prismaError.meta?.driverAdapterError?.name,
+    prismaError.meta?.driverAdapterError?.cause?.message,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     prismaError.code === "P1017" ||
     prismaError.meta?.driverAdapterError?.name === "ConnectionClosed" ||
-    prismaError.message?.includes("Server has closed the connection") === true
+    messages.includes("Server has closed the connection") ||
+    messages.includes("Connection terminated due to connection timeout") ||
+    messages.includes("Connection terminated unexpectedly") ||
+    messages.includes("Can't reach database server")
   );
 }
 
@@ -98,6 +121,14 @@ function createAccelerateClient(databaseUrl: string) {
   } as any);
 }
 
+function createServerlessClient(databaseUrl: string) {
+  const adapter = new PrismaPostgresAdapter({
+    connectionString: databaseUrl,
+  });
+
+  return new PrismaClient({ adapter } as any);
+}
+
 function createDriverAdapterClient(databaseUrl: string) {
   const pool = getOrCreatePool(databaseUrl);
   const adapter = new PrismaPg(pool, {
@@ -114,6 +145,10 @@ function createBasePrismaClient() {
 
   if (databaseUrl.startsWith("prisma+postgres://")) {
     return createAccelerateClient(databaseUrl);
+  }
+
+  if (isPrismaPostgresUrl(databaseUrl)) {
+    return createServerlessClient(databaseUrl);
   }
 
   return createDriverAdapterClient(databaseUrl);
@@ -144,16 +179,20 @@ const RETRYABLE_READ_OPERATIONS = new Set([
   "groupBy",
 ]);
 
-
-
 function createPrismaClientWithRetry(): PrismaClient {
   const baseClient = createBasePrismaClient();
+  const databaseUrl = getDatabaseUrl();
+  const usesServerlessDriver = isPrismaPostgresUrl(databaseUrl);
+
+  if (usesServerlessDriver || databaseUrl.startsWith("prisma+postgres://")) {
+    return baseClient;
+  }
 
   const extendedClient = baseClient.$extends({
     query: {
       $allOperations({ model, operation, args, query }) {
         return query(args).catch(async (error: unknown) => {
-          if (!isConnectionClosedError(error)) {
+          if (!isRetryableConnectionError(error)) {
             throw error;
           }
 

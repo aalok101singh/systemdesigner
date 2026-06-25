@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 
+import { CanvasEditor } from "@/components/editor/canvas-editor";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { ShareDialog } from "@/components/editor/share-dialog";
+import { Button } from "@/components/ui/button";
 import { useProjectActions, type ProjectItem } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
 import { cn } from "@/lib/utils";
@@ -45,6 +47,7 @@ export function WorkspaceShell({
       <ProjectSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        closeOnOutsideClick={false}
         ownedProjects={projectActions.ownedProjects}
         sharedProjects={projectActions.sharedProjects}
         activeRoomId={roomId}
@@ -56,39 +59,11 @@ export function WorkspaceShell({
 
       <div className="relative flex min-h-0 flex-1">
         <main
-          className="relative flex min-h-0 flex-1 items-center justify-center bg-base px-6"
+          className="relative min-h-0 flex-1 bg-base"
           aria-label="Canvas workspace"
-          onClick={() => {
-            if (isSidebarOpen) {
-              setIsSidebarOpen(false);
-            }
-            if (isAiSidebarOpen) {
-              setIsAiSidebarOpen(false);
-            }
-          }}
         >
-          <div className="max-w-lg text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-copy-muted">
-              Canvas
-            </p>
-            <h1 className="mt-4 text-2xl font-semibold text-copy-primary sm:text-3xl">
-              Architecture canvas coming soon
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-copy-secondary">
-              This workspace is ready for your project. The collaborative canvas
-              will load here in a future update.
-            </p>
-          </div>
+          <CanvasEditor roomId={roomId} />
         </main>
-
-        {isAiSidebarOpen ? (
-          <button
-            type="button"
-            className="fixed inset-x-0 top-14 bottom-0 z-30 bg-transparent"
-            aria-label="Close AI sidebar"
-            onClick={() => setIsAiSidebarOpen(false)}
-          />
-        ) : null}
 
         <aside
           className={cn(
@@ -101,9 +76,20 @@ export function WorkspaceShell({
           inert={!isAiSidebarOpen ? true : undefined}
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="flex items-center gap-2 border-b border-surface-border px-4 py-4">
-            <Sparkles className="h-4 w-4 text-accent-ai-text" aria-hidden="true" />
-            <h2 className="text-sm font-medium text-copy-primary">Ghost AI</h2>
+          <div className="flex items-center justify-between border-b border-surface-border px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent-ai-text" aria-hidden="true" />
+              <h2 className="text-sm font-medium text-copy-primary">Ghost AI</h2>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Close AI sidebar"
+              onClick={() => setIsAiSidebarOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex flex-1 items-center justify-center px-6 text-center">
             <p className="text-sm leading-6 text-copy-muted">

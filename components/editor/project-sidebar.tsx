@@ -13,6 +13,7 @@ interface ProjectSidebarProps {
   ownedProjects: ProjectItem[];
   sharedProjects: ProjectItem[];
   activeRoomId?: string;
+  closeOnOutsideClick?: boolean;
   onCreateProject: () => void;
   onRenameProject: (project: ProjectItem) => void;
   onDeleteProject: (project: ProjectItem) => void;
@@ -122,6 +123,7 @@ export function ProjectSidebar({
   ownedProjects,
   sharedProjects,
   activeRoomId,
+  closeOnOutsideClick = true,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
@@ -129,14 +131,14 @@ export function ProjectSidebar({
 }: ProjectSidebarProps) {
   return (
     <>
-      {isOpen && (
+      {isOpen && closeOnOutsideClick ? (
         <button
           type="button"
           className="fixed inset-x-0 top-14 bottom-0 z-30 bg-transparent"
           aria-label="Close project sidebar"
           onClick={onClose}
         />
-      )}
+      ) : null}
 
       <aside
         className={cn(
